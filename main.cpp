@@ -23,6 +23,11 @@ tree* parsing_graph(iftream & infile)
         ifstream>>gate_num;
     }
     
+    for(int i=0;i<input_num;i++)
+    {
+    
+        ckt_graph.add(,0,)
+    }
     
     int no_gate=1;
     string line,word;
@@ -32,14 +37,17 @@ tree* parsing_graph(iftream & infile)
         string gateName;
         getline(infile,line);
         linePipe << line;
-        linePipe >> gateName;
-        if (gateName=="INV")
+        linePipe >> gateLogic;
+        if (gateLogic=="INV")
         {
-            
+            string input;
+            linePipe >> input;
         }
-        
         else
         {
+            string input1,input2;
+            linePipe >> input1 >> input2;
+            
         }
         
         
