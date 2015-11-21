@@ -1,30 +1,31 @@
 //tree.h
 #include <vector>
-
+#include <iostream>
+#include <string>
+#include "gate.h"
+using namespace std;
 #ifndef _TREE_H_
 #define _TREE_H_
-class tree:
+
+class tree
 {
     private:
-        vector<gate*> gates; //topological order
+    	
+        vector<gate> gates; //topological order
 
     public:
-        gate* getByName();
-        tree();
-        ~tree();
-        void addGate(string Name,int logic,string * Fanin,int Fanin_num);
-        void addInput(string Name,int logic)
-        void adjust_fanout();
-}
+    	string name; //
+        tree(); //
+        ~tree(); //
+        void addGate(string Name,int logic,vector<string> Fanin); //
+        void adjust_gate_link();        //
+        gate* getByName(string Name); //
+        
+        friend ostream& operator<< (ostream &out, tree &t); //
+        //bool operator==(tree & a;);
+
+};
 
 
-
-void tree::addGate(string Name,string * Fanin,int Fanin_num)
-{
-}
-
-void tree::adjust_fanout()
-{
-}
 
 #endif
