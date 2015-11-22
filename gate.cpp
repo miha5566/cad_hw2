@@ -12,8 +12,10 @@ gate::gate(string gate_name,int gate_logic,vector<string> faninName)
 gate::~gate(){}
 int gate::getLogic(){return logic;}
 string gate::getName(){return Name;}
-vector<gate*> gate::getFanin(){return fanin;}
+vector<gate*>& gate::getFanin(){return fanin;}
+vector<gate*>& gate::getFanout(){return fanout;}
 vector<string>& gate::getFaninName(){return FaninNames;}
+
 
 bool gate::not_inside(vector<gate*>& v,gate* gptr)
 {
@@ -50,4 +52,38 @@ ostream& operator<< (ostream &out, gate &g)
 		out<<(*iter)->getName()<<"|";
 	out<<endl;
 	return out;
+}
+
+
+bool gate::identical_structure(gate* gptr)
+{
+	if (this->getLogic() == gptr->getLogic())
+	{
+		if(gptr->getLogic() == 0) // INPUT
+		{
+			return true;
+		}
+		else if(gptr->getLogic() == 2) // INV
+			return this->getFanin()[0]->identical_structure(gptr->getFanin()[0]);
+		else if(gptr->getLogic() == 1) // NAND2
+			return 
+				(this->getFanin()[0]->identical_structure(gptr->getFanin()[0])
+				&&this->getFanin()[1]->identical_structure(gptr->getFanin()[1])) 
+				||(this->getFanin()[0]->identical_structure(gptr->getFanin()[1])
+				&&this->getFanin()[1]->identical_structure(gptr->getFanin()[0])) ;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+void gate::swapfanin()
+{
+	if (logic ==1)
+	{
+		gate* tmp = this->fanin[0];
+		this->fanin[0] = this->fanin[1];
+		this->fanin[1] = tmp;
+	}
 }

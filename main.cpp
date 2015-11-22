@@ -7,14 +7,14 @@
 #include "tree.h"
 using namespace std;
 
-//而我聽見下雨的聲音
-//想起你用唇語說愛情
-//熱戀的時刻最任性
-//不顧一切的給約定
-//終於聽見下雨的聲音
-//於是我的世界被吵醒
-//發現你始終很靠近
-//默默的陪在我身邊 態度堅定
+int string_to_int(string s)
+{
+	int ans;
+	stringstream convert ;
+	convert << s;
+	convert >> ans;
+	return ans;
+}
 string int_to_string(int num)
 {
 	string ans;
@@ -50,7 +50,7 @@ tree* parsing_graph(string graph_name,ifstream & infile)
     }
     int no_gate;
     string line,gateLogic;
-    stringstream linePipe;
+    //stringstream linePipe;
     //while (!infile.eof()) 
 
     for (int index=0;index <gate_num;index++)
@@ -64,7 +64,7 @@ tree* parsing_graph(string graph_name,ifstream & infile)
 //        linePipe << line;
 //        linePipe >> gateLogic;
 		infile>>gateLogic;
-        //cout<<gateLogic<<" ";
+        
         if (gateLogic=="INV")// for 1 input cells (INV)
         {
             string input;
@@ -86,8 +86,8 @@ tree* parsing_graph(string graph_name,ifstream & infile)
         }
         
         
-        linePipe.str(std::string()); // clear stringstream
-        linePipe.clear();
+        //linePipe.str(std::string()); // clear stringstream
+        //linePipe.clear();
 
     }
     
@@ -101,17 +101,87 @@ tree* parsing_graph(string graph_name,ifstream & infile)
 }
 
 
-
-vector<tree*> parsing_cell(ifstream & infile)
+vector<tree*>* parsing_cell(char* infileName)
 {
-    vector<tree*> celllib;
-    //for 
+	ifstream infile;
+	infile.open(infileName);//,ios::binary);
+	
+    vector<tree*>* celllib = new vector<tree*>;
+    stringstream linePipe;
+    string line;    
+
+    string cellName;
+    int celldelay;
     
+    tree* t = new tree;
+	int no_line = 0;
+    while(getline(infile,line))
+    {
+    	no_line += 1;
+	    linePipe.str("");
+		linePipe.clear();
+		line = line.substr(0,line.size()-1);
+		
+		if (no_line == 1)
+		{
+			cellName = line;
+		}
+		else if(no_line == 2)
+    	{
+	    	celldelay = string_to_int(line);
+    	}
+    	else
+    	{
+    		int no_gate = no_line-2;
+    		if (line =="" && line.size() ==0)
+			{
+				t->celldelay = celldelay;
+		    	t->name = cellName;
+		    	t->adjust_gate_link();
+		    	
+		    	
+		    	vector<tree*> expanded_trees = t->expand();
+		    	for(unsigned i=0;i<expanded_trees.size();i++)    	
+					celllib->push_back(expanded_trees[i]);
+				t = new tree;
+				//reset all parameters
+				no_line = 0;
+				//break;
+			}
+			else
+			{
+				string gateLogic;
+				string gateName = "G";
+		        gateName = gateName+int_to_string(no_gate);
+				linePipe<<line;	
+				linePipe>>gateLogic;
+	    		
+	    		if (gateLogic=="INV")
+	    		{
+	    			string input;
+	    			linePipe >> input;
+		            vector<string> faninName;
+    		        faninName.push_back(input);
+    		        t->addGate(gateName,2,faninName); // only for inv
+	    		}
+	    		else 
+	    		{
+	    			string input1,input2;
+		            linePipe >> input1 >> input2;  
+    		        vector<string> faninName;
+    		        faninName.push_back(input1);
+    		        faninName.push_back(input2);
+        		    t->addGate(gateName,1,faninName); // only for nand2
+	    		}
+			}
+    	}
+    	
+    	//cout<<"line="<<"\""<<line<<"\""<<line.size()<<endl;
+		//cout<<"linesize="<<line.size()<<endl;
+    }
+    infile.close();
     return celllib;
-    
 }
-
-
 
 int main(int argc ,char * argv[])
 {
@@ -123,13 +193,28 @@ int main(int argc ,char * argv[])
     
     ifstream infile_graph;
     infile_graph.open(argv[1]);
-    ifstream infile_cell;
-    infile_cell.open(argv[2]);
+
 
 	tree * treeptr = parsing_graph("main_graph",infile_graph);
-    cout<<*treeptr<<endl;
-    
+    //cout<<*treeptr<<endl;
+ 	
+ 	vector<tree*>* celllib = parsing_cell(argv[2]);
+ 	for (vector<tree*>::iterator it = celllib->begin(); it != celllib->end() ;++it)
+ 	{
+ 		cout<<*(*it)<<endl;
+ 	}
+ 	
+ 	
+ 	
+ 	
+ 	
     delete treeptr;
+    for (vector<tree*>::iterator it = celllib->begin(); it != celllib->end() ;++it)
+ 		delete *it;
+ 	delete celllib;
+    
+    infile_graph.close();
+
     return 0;
 
     
