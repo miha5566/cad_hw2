@@ -64,11 +64,11 @@ tree* parsing_graph(string graph_name,ifstream & infile)
 //        linePipe << line;
 //        linePipe >> gateLogic;
 		infile>>gateLogic;
-        cout<<gateLogic<<" ";
+        //cout<<gateLogic<<" ";
         if (gateLogic=="INV")// for 1 input cells (INV)
         {
             string input;
-            infile >> input;  //
+            infile >> input;  // linePipe>>input is wrong but don't know why
             vector<string> faninName;
             faninName.push_back(input);
             ckt_graph->addGate(gateName,2,faninName); // only for inv
@@ -78,7 +78,6 @@ tree* parsing_graph(string graph_name,ifstream & infile)
         {
             string input1,input2;
             infile >> input1 >> input2;  //
-            cout<<input1<<" "<<input2<<endl;
             vector<string> faninName;
             faninName.push_back(input1);
             faninName.push_back(input2);
@@ -96,7 +95,7 @@ tree* parsing_graph(string graph_name,ifstream & infile)
     cout<<"gate_num given:"<<gate_num<<endl;
 
 	ckt_graph->name = graph_name;
-	//ckt_graph->adjust_gate_link();
+	ckt_graph->adjust_gate_link();
 
 	return ckt_graph;
 }

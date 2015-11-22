@@ -31,7 +31,7 @@ class gate
         int getLogic();
 		string getName();
         vector<gate*> getFanin(); //
-        vector<string> getFaninName(); //
+        vector<string>& getFaninName(); //
         bool not_inside(vector<gate*>& v,gate* gptr);
         void addFanin(gate* gptr); //
         void addFanout(gate* gptr); //

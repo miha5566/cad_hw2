@@ -13,7 +13,7 @@ gate::~gate(){}
 int gate::getLogic(){return logic;}
 string gate::getName(){return Name;}
 vector<gate*> gate::getFanin(){return fanin;}
-vector<string> gate::getFaninName(){return FaninNames;}
+vector<string>& gate::getFaninName(){return FaninNames;}
 
 bool gate::not_inside(vector<gate*>& v,gate* gptr)
 {
@@ -39,11 +39,15 @@ void gate::addFanout(gate* gptr)
 ostream& operator<< (ostream &out, gate &g)
 {
 	out<<"Logic:"<<g.logic<<";Name:"<<g.Name<<endl;
-	out<<"Fanin:";
+	out<<"FaninNames:";
 	for (vector<string>::iterator iter=g.FaninNames.begin() ; iter!=g.FaninNames.end() ;++iter)
-	{
 		out<<*iter<<"|";
-	}
+	out<<endl<<"Fanin:";
+	for (vector<gate*>::iterator iter=g.fanin.begin() ; iter!=g.fanin.end() ;++iter)
+		out<<(*iter)->getName()<<"|";
+	out<<endl<<"Fanout:";
+	for (vector<gate*>::iterator iter=g.fanout.begin() ; iter!=g.fanout.end() ;++iter)
+		out<<(*iter)->getName()<<"|";
 	out<<endl;
 	return out;
 }
