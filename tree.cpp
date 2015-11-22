@@ -138,6 +138,8 @@ void compute(tree cell)
 */
 vector<tree*>& tree::expand()
 {
+
+
 	for (unsigned index=0;index < this->topologicalOrderGates.size();index++)
 	{
 		if(this->topologicalOrderGates[index]->getLogic() == 1)//only for nand
@@ -145,7 +147,7 @@ vector<tree*>& tree::expand()
 			gstack.push_back(this->topologicalOrderGates[index]);
 		}
 	}
-	
+	cout<<"yolo"<<endl;
 	recursive_expand(this);
 	
 	//unsigned rootidx = length(cellptr->topologicalOrderGates())-1;
@@ -154,19 +156,20 @@ vector<tree*>& tree::expand()
 }
 void tree::recursive_expand(tree* t)
 {
+	cout<<"yolo"<<endl;
 	tree* newt = t->copy(); // t->
-
-	gate* g = gstack.back(); // target gate
-	gstack.pop_back(); 
+	cout<<"yolo"<<endl;	
 	
-	newt->getByName(g->getName())->swapfanin();
 	if(gstack.size()==0)
-	{
+	{		
 		this->expandtrees.push_back(t);
 		this->expandtrees.push_back(newt);
 	}
 	else
 	{
+		gate* g = gstack.back(); // target gate 
+		gstack.pop_back(); ////////////////can't use only 1 gstack 
+		newt->getByName(g->getName())->swapfanin();
 		this->recursive_expand(newt);
 		this->recursive_expand(t);
 	}

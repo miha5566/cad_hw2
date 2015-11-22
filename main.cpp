@@ -93,16 +93,17 @@ tree* parsing_graph(string graph_name,ifstream & infile)
     
     cout<<"no_gate:"<<no_gate<<endl;
     cout<<"gate_num given:"<<gate_num<<endl;
-
+	
 	ckt_graph->name = graph_name;
 	ckt_graph->adjust_gate_link();
 
+	
 	return ckt_graph;
 }
 
 
 vector<tree*>* parsing_cell(char* infileName)
-{
+{	
 	ifstream infile;
 	infile.open(infileName);//,ios::binary);
 	
@@ -139,9 +140,10 @@ vector<tree*>* parsing_cell(char* infileName)
 		    	t->name = cellName;
 		    	t->adjust_gate_link();
 		    	
-		    	
+
 		    	vector<tree*> expanded_trees = t->expand();
-		    	for(unsigned i=0;i<expanded_trees.size();i++)    	
+
+		    	for(unsigned i=0;i<expanded_trees.size();i++)
 					celllib->push_back(expanded_trees[i]);
 				t = new tree;
 				//reset all parameters
