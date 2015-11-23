@@ -29,7 +29,7 @@ class tree
         friend ostream& operator<< (ostream &out, tree &t); //
         
         vector<tree*>& expand();
-        void recursive_expand(tree* t);
+       // void recursive_expand(tree* t);
         tree* copy();
         
         //bool operator==(tree & a;);

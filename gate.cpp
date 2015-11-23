@@ -17,6 +17,7 @@ vector<gate*>& gate::getFanout(){return fanout;}
 vector<string>& gate::getFaninName(){return FaninNames;}
 
 
+
 bool gate::not_inside(vector<gate*>& v,gate* gptr)
 {
 	for (vector<gate*>::iterator iter=v.begin() ; iter!=v.end() ;++iter)
@@ -68,9 +69,9 @@ bool gate::identical_structure(gate* gptr)
 		else if(gptr->getLogic() == 1) // NAND2
 			return 
 				(this->getFanin()[0]->identical_structure(gptr->getFanin()[0])
-				&&this->getFanin()[1]->identical_structure(gptr->getFanin()[1])) 
-				||(this->getFanin()[0]->identical_structure(gptr->getFanin()[1])
-				&&this->getFanin()[1]->identical_structure(gptr->getFanin()[0])) ;
+				&&this->getFanin()[1]->identical_structure(gptr->getFanin()[1])) ;
+				//||(this->getFanin()[0]->identical_structure(gptr->getFanin()[1])
+				//&&this->getFanin()[1]->identical_structure(gptr->getFanin()[0])) ;
 	}
 	else
 	{
@@ -85,5 +86,38 @@ void gate::swapfanin()
 		gate* tmp = this->fanin[0];
 		this->fanin[0] = this->fanin[1];
 		this->fanin[1] = tmp;
+		
+		string temp = this->FaninNames[0];
+		this->FaninNames[0] = this->FaninNames[1];
+		this->FaninNames[1] = temp;
 	}
+}
+
+
+/*
+bool gate::isLeaf()
+{
+	if(logic==1)
+	{	
+		return fanin[0]->getLogic()==0 && fanin[1]->getLogic()==0 ;
+	}
+	else if(logic==2)
+	{
+		return fanin[0]->getLogic()==0 ;
+	}
+	else	
+}*/
+
+vector<string> gate::getRevFaninName()
+{
+
+	vector<string> ans;
+	//cout<<FaninNames.size()<<endl;
+	for(int i=int(FaninNames.size()-1);i>=0;i--)
+	{
+		//cout<<"yolo3"<<i<<endl;
+		ans.push_back(FaninNames[i]);
+		}
+//cout<<"yolo2"<<endl;
+	return ans;
 }

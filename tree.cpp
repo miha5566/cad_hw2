@@ -4,13 +4,20 @@
 #include "gate.h"
 #include "tree.h"
 using namespace std;
-tree::tree(){}
+tree::tree()
+{ 
+gates.reserve(100);
+gstack.reserve(100);
+topologicalOrderGates.reserve(100);
+expandtrees.reserve(100);
+}
 tree::~tree(){}
 
 void tree::addGate(string Name,int logic,vector<string> Fanin)
 {
 	gate g(Name,logic,Fanin);
 	gates.push_back(g);
+	
 	return;
 }
 
@@ -49,22 +56,26 @@ void tree::topologicalSort()
 		gptr->done = false;	
 	}
 	//cout<<this->name<<endl;
-	for (vector<gate>::iterator gptr=gates.begin() ; gptr!=gates.end() ; ++gptr)
-	{
-		if (!gptr->done && gptr->waiting_count==0)
-		{	
-			//cout<<gptr->getName()<<endl;
-			topologicalOrderGates.push_back (&(*gptr));
-			gptr->done = true;
-			for(unsigned i=0;i<gptr->getFanout().size();i++)
-			{
-				gptr->getFanout()[i]->waiting_count -= 1;
-				//cout<<"\t"<<gptr->getFanout()[i]->getName()<<endl;
-			}
-		}
-		
-	}
 	
+	while(1)
+	{
+		if(topologicalOrderGates.size()==gates.size())
+			break;
+		for (vector<gate>::iterator gptr=gates.begin() ; gptr!=gates.end() ; ++gptr)
+		{
+			if (!gptr->done && gptr->waiting_count==0)
+			{	
+				//cout<<gptr->getName()<<endl;
+				topologicalOrderGates.push_back (&(*gptr));
+				gptr->done = true;
+				for(unsigned i=0;i<gptr->getFanout().size();i++)
+				{
+					gptr->getFanout()[i]->waiting_count -= 1;
+					//cout<<"\t"<<gptr->getFanout()[i]->getName()<<endl;
+				}
+			}		
+		}
+	}
 }
 
 void tree::adjust_gate_link()
@@ -106,76 +117,88 @@ ostream& operator<< (ostream &out, tree &t)
 	/*
 	for (vector<gate>::iterator iter=t.gates.begin() ; iter!=t.gates.end() ; ++iter)
 		out <<"----"<<endl<< *iter;
-		*/
+	*/	
+	/**/
 	for (unsigned i =0;i<t.topologicalOrderGates.size();i++)
 		out <<"----"<<endl<< *(t.topologicalOrderGates[i]);
+	
 	out<<"----"<<endl;
 	return out;
 }
 
-/*
 
-bool match (gate* gptr, tree* cellptr)
-{
-	for (gptr->getFanin())
-	
-	unsigned rootidx = length(cellptr->topologicalOrderGates())-1;
-	gate* root = cellptr-> topologicalOrderGates()[rootidx];
-	
-	if(gptr->try_match(root))
-	{
-		
-	}
-	
-}
-
-void compute(tree cell)
-{
-	for gate in this -> gates
-		check
-}
-
-*/
 vector<tree*>& tree::expand()
 {
+	cout<<(topologicalOrderGates.size())<<endl;
+	cout<<(this->name)<<endl;
+	
+	if(this->topologicalOrderGates[0]->getLogic() == 1)
+	{
+		tree * newt = new tree;
+		tree * newt2 = new tree;
+		
+		gate * gptr = this->topologicalOrderGates[0];
+		newt->addGate(gptr->getName(),gptr->getLogic(),gptr->getFaninName());
+		newt2->addGate(gptr->getName(),gptr->getLogic(),gptr->getRevFaninName());
+		newt->celldelay=this->celldelay;
+    	newt->name=this->name; 
+    	newt2->celldelay=this->celldelay;
+    	newt2->name=this->name; 
+ 		expandtrees.push_back(newt);
+ 		expandtrees.push_back(newt2);
+	}
+	else if(this->topologicalOrderGates[0]->getLogic() == 2 ||this->topologicalOrderGates[0]->getLogic() == 0 )
+	{
+		tree * newt = new tree;
+		gate * gptr = this->topologicalOrderGates[0];
+		newt->addGate(gptr->getName(),gptr->getLogic(),gptr->getFaninName());
+		newt->celldelay=this->celldelay;
+    	newt->name=this->name; 
+		expandtrees.push_back(newt);
+	}
 
-
-	for (unsigned index=0;index < this->topologicalOrderGates.size();index++)
+	for (unsigned index=1;index < this->topologicalOrderGates.size();index++)
 	{
 		if(this->topologicalOrderGates[index]->getLogic() == 1)//only for nand
 		{
-			gstack.push_back(this->topologicalOrderGates[index]);
+			
+			gate * gptr = this->topologicalOrderGates[index];
+			vector<tree*> temp;
+			for(unsigned i=0;i<expandtrees.size();i++)
+			{
+				temp.push_back(expandtrees[i]->copy());
+				expandtrees[i]->addGate(gptr->getName(),gptr->getLogic(),gptr->getFaninName());
+			}
+			for(unsigned i=0;i<temp.size();i++)
+			{	
+				temp[i]->addGate(gptr->getName(),gptr->getLogic(),gptr->getRevFaninName());///
+				expandtrees.push_back(temp[i]);
+			}
+				
+		}
+		else if(this->topologicalOrderGates[index]->getLogic() == 2||this->topologicalOrderGates[0]->getLogic() == 0 )
+		{
+			gate * gptr = this->topologicalOrderGates[index];
+			for(unsigned i=0;i<expandtrees.size();i++)
+			{
+				expandtrees[i]->addGate(gptr->getName(),gptr->getLogic(),gptr->getFaninName());
+			}
 		}
 	}
-	cout<<"yolo"<<endl;
-	recursive_expand(this);
-	
-	//unsigned rootidx = length(cellptr->topologicalOrderGates())-1;
-	//gate* root = cellptr-> topologicalOrderGates()[rootidx];
+	/*
+	for (vector<tree*>::iterator it = expandtrees.begin(); it != expandtrees.end() ;++it)
+ 	{
+
+ 		(*it)->adjust_gate_link();
+ 		cout<<*(*it)<<endl;
+
+ 	}*/
+ 	
+ 	//cout<<"what"<<endl;
+ 	
+ 	
 	return this->expandtrees;
 }
-void tree::recursive_expand(tree* t)
-{
-	cout<<"yolo"<<endl;
-	tree* newt = t->copy(); // t->
-	cout<<"yolo"<<endl;	
-	
-	if(gstack.size()==0)
-	{		
-		this->expandtrees.push_back(t);
-		this->expandtrees.push_back(newt);
-	}
-	else
-	{
-		gate* g = gstack.back(); // target gate 
-		gstack.pop_back(); ////////////////can't use only 1 gstack 
-		newt->getByName(g->getName())->swapfanin();
-		this->recursive_expand(newt);
-		this->recursive_expand(t);
-	}
-	
-}
-
 
 tree* tree::copy()
 {

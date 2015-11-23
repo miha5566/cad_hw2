@@ -54,7 +54,8 @@ class gate
         
         bool identical_structure(gate * gptr);
         void swapfanin();
-        
+        //bool isLeaf();
+        vector<string> getRevFaninName();
         
 };
 
