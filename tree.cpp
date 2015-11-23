@@ -16,7 +16,7 @@ tree::~tree()
 {   
     for (unsigned i=0;i<expandtrees.size();i++)
     {
-        delete expandtree[i];
+        delete expandtrees[i];
     }
 }
 
@@ -136,8 +136,8 @@ ostream& operator<< (ostream &out, tree &t)
 ///for cell expansion
 vector<tree*>& tree::expand()
 {
-	cout<<(topologicalOrderGates.size())<<endl;
-	cout<<(this->name)<<endl;
+	//cout<<(topologicalOrderGates.size())<<endl;
+	//cout<<(this->name)<<endl;
 	
 	if(this->topologicalOrderGates[0]->getLogic() == 1)
 	{
@@ -220,8 +220,7 @@ tree* tree::copy()
 
 gate* tree::getRoot()
 {
-    unsigned idx = topologicalOrderGates.size()-1;
-    return topologicalOrderGates[idx];
+    return topologicalOrderGates.back();
 }
 /*******************************************************/
 ///for match in main ckt
@@ -244,7 +243,8 @@ void tree::match(tree* cell)
                     d = dvalue;
                 }
             }
-            gptr->addMatchCell(cell->delay + dvalue,gptr->getName(),cell->name,gptr->tempCellFanin)
+            cout<<gptr->getName()<<":"<<cell->name<<endl;
+            gptr->addMatchCell(cell->celldelay + d,gptr->getName(),cell->name,gptr->tempCellFanin);
         }
     }
 }
@@ -254,6 +254,43 @@ void tree::output(char* outfileName)
 {
     ofstream outfile;
     outfile.open(outfileName);
+    
+    vector<gate*> gstack;
+    
+//    gate* gptr=this->getRoot();
+
+    gstack.push_back (this->getRoot());
+    //gate* p = this->topologicalOrderGates.back();
+    cout<<"fuck you"<<endl;
+    for(int i =0;i<int(topologicalOrderGates.size());i++)
+    {
+       cout<<topologicalOrderGates[i]->match_case.size()<<endl;
+       
+    }
+    if (this->getRoot()->getLogic()!=0)
+
+        outfile<<this->getRoot()->match_case[0].delay<<endl<<endl;
+        
+    
+    cout<<"fuck you"<<endl;    
+    while (gstack.size()>0)
+    {
+        gate* gptr = gstack.back();
+        gstack.pop_back();
+        if (gptr->getLogic()!=0)
+        {
+            outfile <<gptr->match_case[0].logic_name<<' '
+                    <<gptr->match_case[0].name<<' ';
+            for (unsigned i=0;i<gptr->match_case[0].FaninNames.size();i++)
+            {
+                
+                string gatename = gptr->match_case[0].FaninNames[i];
+                gstack.push_back(this->getByName(gatename));   
+                outfile<<gatename<<' ';
+            }
+            outfile<<endl;
+        }
+    }    
     outfile.close();
 }
 

@@ -137,7 +137,7 @@ void gate::clearTmpCellFanin()
 
 void gate::addMatchCell(int delay,string cellName,string logicName,vector<string> Fanin)
 {
-    CELL c = {delay,cellName,logicName,Fanin}
+    CELL c = {delay,cellName,logicName,Fanin};
     bool insert= true;
     for (vector<CELL>::iterator it=this->match_case.begin();it!=this->match_case.end();++it)
     {

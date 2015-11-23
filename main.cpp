@@ -210,8 +210,12 @@ int main(int argc ,char * argv[])
  	*/
  	
  	for(vector<tree*>::iterator it = celllib->begin(); it != celllib->end() ;++it)
-        treeptr->match(*it)
+ 	{
+        //cout<<(*it)->name<<endl;
+        treeptr->match(*it);
+    }
         
+    //cout<<*treeptr;
     treeptr->output(argv[3]);
  	
     delete treeptr;

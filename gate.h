@@ -31,17 +31,18 @@ class gate
         vector<string> FaninNames;
         string Name;
         
-        vector <CELL> match_case;
+        
         
     public:
     	//for topological
     	
     	int waiting_count;
     	bool done;
+    	
     	//for matching cell
 //    	bool visited;
     	vector<string> tempCellFanin;
-    	
+    	vector <CELL> match_case;
     	
         gate(); //
         gate(string gate_name,int gate_logic,vector<string> faninName); //
@@ -63,7 +64,7 @@ class gate
         vector<string> getRevFaninName();
         
         void clearTmpCellFanin();
-        void addMatchCell(int delay,string cellName,string logicName,string outputName,vector<string> Fanin);
+        void addMatchCell(int delay,string cellName,string logicName,vector<string> Fanin);
         int getDelay();
 };
 
