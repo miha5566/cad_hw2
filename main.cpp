@@ -92,8 +92,8 @@ tree* parsing_graph(string graph_name,ifstream & infile)
 
     }
     
-    cout<<"no_gate:"<<no_gate<<endl;
-    cout<<"gate_num given:"<<gate_num<<endl;
+    //cout<<"no_gate:"<<no_gate<<endl;
+    //cout<<"gate_num given:"<<gate_num<<endl;
 	
 	ckt_graph->name = graph_name;
 	ckt_graph->adjust_gate_link();
