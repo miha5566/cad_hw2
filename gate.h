@@ -12,7 +12,7 @@ struct CELL
 	int delay;
 	string name;
 	string logic_name;
-	string out;
+	//string out;
 	vector<string> FaninNames;
 };
 
@@ -32,12 +32,16 @@ class gate
         string Name;
         
         vector <CELL> match_case;
+        
     public:
     	//for topological
+    	
     	int waiting_count;
     	bool done;
     	//for matching cell
-    	bool visited;
+//    	bool visited;
+    	vector<string> tempCellFanin;
+    	
     	
         gate(); //
         gate(string gate_name,int gate_logic,vector<string> faninName); //
@@ -54,9 +58,13 @@ class gate
         
         bool identical_structure(gate * gptr);
         void swapfanin();
+ 
         //bool isLeaf();
         vector<string> getRevFaninName();
         
+        void clearTmpCellFanin();
+        void addMatchCell(int delay,string cellName,string logicName,string outputName,vector<string> Fanin);
+        int getDelay();
 };
 
 

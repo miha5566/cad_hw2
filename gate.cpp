@@ -1,6 +1,13 @@
 #include "gate.h"
 
-gate::gate(){}
+gate::gate()
+{
+    fanin.reserve(50);
+    fanout.reserve(50);
+    FaninNames.reserve(50);        
+    match_case.reserve(50);
+    tempCellFanin.reserve(50);
+}
 
 gate::gate(string gate_name,int gate_logic,vector<string> faninName)
 {
@@ -58,20 +65,21 @@ ostream& operator<< (ostream &out, gate &g)
 
 bool gate::identical_structure(gate* gptr)
 {
-	if (this->getLogic() == gptr->getLogic())
+	if (this->getLogic() == gptr->getLogic() )
 	{
 		if(gptr->getLogic() == 0) // INPUT
 		{
+		    this->tempCellFanin.push_back(this->getName());
 			return true;
+			
 		}
-		else if(gptr->getLogic() == 2) // INV
+		else if(gptr->getLogic() == 2 && this->fanout.size()<=1 ) // INV
 			return this->getFanin()[0]->identical_structure(gptr->getFanin()[0]);
-		else if(gptr->getLogic() == 1) // NAND2
-			return 
-				(this->getFanin()[0]->identical_structure(gptr->getFanin()[0])
-				&&this->getFanin()[1]->identical_structure(gptr->getFanin()[1])) ;
-				//||(this->getFanin()[0]->identical_structure(gptr->getFanin()[1])
-				//&&this->getFanin()[1]->identical_structure(gptr->getFanin()[0])) ;
+		else if(gptr->getLogic() == 1 && this->fanout.size()<=1 ) // NAND2
+			return    this->getFanin()[0]->identical_structure(gptr->getFanin()[0])
+				    &&this->getFanin()[1]->identical_structure(gptr->getFanin()[1]) ;
+		else 
+		    return false;
 	}
 	else
 	{
@@ -92,6 +100,7 @@ void gate::swapfanin()
 		this->FaninNames[1] = temp;
 	}
 }
+
 
 
 /*
@@ -117,7 +126,38 @@ vector<string> gate::getRevFaninName()
 	{
 		//cout<<"yolo3"<<i<<endl;
 		ans.push_back(FaninNames[i]);
-		}
-//cout<<"yolo2"<<endl;
+	}
 	return ans;
+}
+
+void gate::clearTmpCellFanin()
+{
+    this->tempCellFanin.clear();
+}
+
+void gate::addMatchCell(int delay,string cellName,string logicName,vector<string> Fanin)
+{
+    CELL c = {delay,cellName,logicName,Fanin}
+    bool insert= true;
+    for (vector<CELL>::iterator it=this->match_case.begin();it!=this->match_case.end();++it)
+    {
+        if(it->delay>c.delay) 
+        {
+            match_case.erase(it);
+        }
+        else if(it->delay<c.delay) 
+        {
+            insert = false;
+        } 
+    }
+    if (insert)
+        match_case.push_back(c);
+}
+
+int gate::getDelay()
+{
+    if (logic==0)
+        return 0;
+    else
+        return match_case[0].delay;
 }

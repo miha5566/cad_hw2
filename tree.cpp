@@ -3,15 +3,22 @@
 //#include <string>
 #include "gate.h"
 #include "tree.h"
+#include <fstream>
 using namespace std;
 tree::tree()
 { 
-gates.reserve(100);
-gstack.reserve(100);
-topologicalOrderGates.reserve(100);
-expandtrees.reserve(100);
+    gates.reserve(100);
+    gstack.reserve(100);
+    topologicalOrderGates.reserve(100);
+    expandtrees.reserve(100);
 }
-tree::~tree(){}
+tree::~tree()
+{   
+    for (unsigned i=0;i<expandtrees.size();i++)
+    {
+        delete expandtree[i];
+    }
+}
 
 void tree::addGate(string Name,int logic,vector<string> Fanin)
 {
@@ -125,8 +132,8 @@ ostream& operator<< (ostream &out, tree &t)
 	out<<"----"<<endl;
 	return out;
 }
-
-
+/*******************************************************/
+///for cell expansion
 vector<tree*>& tree::expand()
 {
 	cout<<(topologicalOrderGates.size())<<endl;
@@ -190,7 +197,7 @@ vector<tree*>& tree::expand()
  	{
 
  		(*it)->adjust_gate_link();
- 		cout<<*(*it)<<endl;
+ 	//	cout<<*(*it)<<endl;
 
  	}
  	
@@ -210,3 +217,55 @@ tree* tree::copy()
 	t->adjust_gate_link();
 	return t;
 }
+
+gate* tree::getRoot()
+{
+    unsigned idx = topologicalOrderGates.size()-1;
+    return topologicalOrderGates[idx];
+}
+/*******************************************************/
+///for match in main ckt
+void tree::match(tree* cell)
+{   
+    gate* gptr;
+    for(int i =0;i<int(topologicalOrderGates.size());i++)
+    {
+        gptr = topologicalOrderGates[i];
+        gptr -> clearTmpCellFanin();
+        if (gptr-> identical_structure(cell->getRoot()) )
+        {
+            int d = 0;
+            for (int j=0; j< int(gptr->tempCellFanin.size());j++) //choose the max delay of inputs
+            {
+                string n = gptr->tempCellFanin[j]; //gate name
+                int dvalue = this->getByName(n)->getDelay(); //delay
+                if (dvalue>d)
+                {
+                    d = dvalue;
+                }
+            }
+            gptr->addMatchCell(cell->delay + dvalue,gptr->getName(),cell->name,gptr->tempCellFanin)
+        }
+    }
+}
+
+
+void tree::output(char* outfileName)
+{
+    ofstream outfile;
+    outfile.open(outfileName);
+    outfile.close();
+}
+
+
+
+
+
+
+
+
+
+
+
+
+

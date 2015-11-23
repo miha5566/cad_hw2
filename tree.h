@@ -33,7 +33,12 @@ class tree
         tree* copy();
         
         //bool operator==(tree & a;);
-
+        
+        gate* getRoot();
+        void match(tree* cell);
+        
+        
+        void output(char* outfileName);
 };
 
 

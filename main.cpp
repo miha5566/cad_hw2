@@ -206,7 +206,13 @@ int main(int argc ,char * argv[])
  	for (vector<tree*>::iterator it = celllib->begin(); it != celllib->end() ;++it)
  	{
  		cout<<*(*it)<<endl;
- 	}*/
+ 	}
+ 	*/
+ 	
+ 	for(vector<tree*>::iterator it = celllib->begin(); it != celllib->end() ;++it)
+        treeptr->match(*it)
+        
+    treeptr->output(argv[3]);
  	
     delete treeptr;
     for (vector<tree*>::iterator it = celllib->begin(); it != celllib->end() ;++it)
