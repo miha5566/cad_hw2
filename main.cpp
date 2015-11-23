@@ -202,15 +202,11 @@ int main(int argc ,char * argv[])
  	
  	vector<tree*>* celllib = parsing_cell(argv[2]);
  	
+ 	/*
  	for (vector<tree*>::iterator it = celllib->begin(); it != celllib->end() ;++it)
  	{
  		cout<<*(*it)<<endl;
- 	}
- 	
- 	
- 	
- 	
- 	
+ 	}*/
  	
     delete treeptr;
     for (vector<tree*>::iterator it = celllib->begin(); it != celllib->end() ;++it)

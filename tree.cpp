@@ -185,14 +185,14 @@ vector<tree*>& tree::expand()
 			}
 		}
 	}
-	/*
+	
 	for (vector<tree*>::iterator it = expandtrees.begin(); it != expandtrees.end() ;++it)
  	{
 
  		(*it)->adjust_gate_link();
  		cout<<*(*it)<<endl;
 
- 	}*/
+ 	}
  	
  	//cout<<"what"<<endl;
  	
