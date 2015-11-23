@@ -4,11 +4,13 @@
 #include "gate.h"
 #include "tree.h"
 #include <fstream>
+#include <algorithm>
+#include <sstream>
 using namespace std;
 tree::tree()
 { 
     gates.reserve(100);
-    gstack.reserve(100);
+    //gstack.reserve(100);
     topologicalOrderGates.reserve(100);
     expandtrees.reserve(100);
 }
@@ -108,7 +110,7 @@ void tree::adjust_gate_link()
 gate* tree::getByName(string name)
 {
 	for (vector<gate>::iterator iter=gates.begin() ; iter!=gates.end() ; ++iter)
-	{
+	{	
 		if (iter->getName() == name)
 		{
 			return &(*iter);
@@ -224,31 +226,66 @@ gate* tree::getRoot()
 }
 /*******************************************************/
 ///for match in main ckt
-void tree::match(tree* cell)
-{   
-    gate* gptr;
-    for(int i =0;i<int(topologicalOrderGates.size());i++)
+void tree::match_celllib(vector<tree*> celllib)
+{
+	gate* gptr;
+	for(int i =0;i<int(topologicalOrderGates.size());i++)
     {
-        gptr = topologicalOrderGates[i];
-        gptr -> clearTmpCellFanin();
-        if (gptr-> identical_structure(cell->getRoot()) )
+    	gptr = topologicalOrderGates[i];
+		tree* tptr;
+	
+		for(unsigned i =0;i<celllib.size();i++)
+		{
+			gptr -> clearTmpCellFanin();
+			tptr = celllib[i];
+			this->match (gptr,tptr);
+		}
+	}
+}
+void tree::match(gate* gptr,tree* cell)
+{       
+        if (gptr-> identical(cell->getRoot()) )
         {
             int d = 0;
+
+            
             for (int j=0; j< int(gptr->tempCellFanin.size());j++) //choose the max delay of inputs
             {
                 string n = gptr->tempCellFanin[j]; //gate name
                 int dvalue = this->getByName(n)->getDelay(); //delay
-                if (dvalue>d)
+              	if (dvalue>d)
                 {
                     d = dvalue;
                 }
+                
             }
-            cout<<gptr->getName()<<":"<<cell->name<<endl;
+            //cout<<gptr->getName()<<":"<<cell->name<<":"<<cell->celldelay + d<<<endl;
             gptr->addMatchCell(cell->celldelay + d,gptr->getName(),cell->name,gptr->tempCellFanin);
+            
         }
-    }
+
 }
 
+
+int stoi(string s)
+{
+	int ans;
+	stringstream convert ;
+	convert << s;
+	convert >> ans;
+	return ans;
+}
+
+bool cmp_str(const string& a,const string& b)
+{
+	if(a[0]>b[0]) //P comes first
+		return true;	
+	else if (a[0]==b[0])
+		return stoi(a.substr(1,a.length()-1))< stoi(b.substr(1,b.length()-1) );
+	else 
+		return false;
+	 //smaller comes first
+}
 
 void tree::output(char* outfileName)
 {
@@ -256,43 +293,78 @@ void tree::output(char* outfileName)
     outfile.open(outfileName);
     
     vector<gate*> gstack;
+    vector<gate*> output_list;
     
 //    gate* gptr=this->getRoot();
 
-    gstack.push_back (this->getRoot());
-    //gate* p = this->topologicalOrderGates.back();
-    cout<<"fuck you"<<endl;
-    for(int i =0;i<int(topologicalOrderGates.size());i++)
-    {
-       cout<<topologicalOrderGates[i]->match_case.size()<<endl;
-       
-    }
-    if (this->getRoot()->getLogic()!=0)
+	vector <gate*> all_node = this->all_out_node();
+	for(vector <gate*>::iterator it = all_node.begin();it!=all_node.end();++it)
+	{
+		gstack.push_back (*it);
+	}
 
-        outfile<<this->getRoot()->match_case[0].delay<<endl<<endl;
-        
-    
-    cout<<"fuck you"<<endl;    
+    outfile<<this->getRoot()->match_case[0].delay<<endl<<endl;
+
     while (gstack.size()>0)
     {
         gate* gptr = gstack.back();
         gstack.pop_back();
         if (gptr->getLogic()!=0)
         {
-            outfile <<gptr->match_case[0].logic_name<<' '
-                    <<gptr->match_case[0].name<<' ';
+        	bool inside=false;
+        	for(vector <gate*>::iterator it = output_list.begin();it!=output_list.end();++it)
+        		if (gptr->getName() == (*it)->getName())
+        		{
+        			inside = true;
+        			break;
+        		}
+        	if(!inside)
+        		output_list.push_back(gptr);
+            //outfile <<gptr->match_case[0].logic_name<<' '
+            //        <<gptr->match_case[0].name<<' ';
             for (unsigned i=0;i<gptr->match_case[0].FaninNames.size();i++)
             {
                 
                 string gatename = gptr->match_case[0].FaninNames[i];
                 gstack.push_back(this->getByName(gatename));   
-                outfile<<gatename<<' ';
+                //outfile<<gatename<<' ';
             }
-            outfile<<endl;
+            //outfile<<endl;
         }
-    }    
+    } 
+    sort(output_list.begin(),output_list.end());
+    
+    for(vector <gate*>::iterator it = output_list.begin();it!=output_list.end();++it)
+    {
+    	//sort((*it)->match_case[0].FaninNames.begin(),(*it)->match_case[0].FaninNames.end());
+    	sort((*it)->match_case[0].FaninNames.begin(),(*it)->match_case[0].FaninNames.end(),cmp_str);
+    	outfile <<(*it)->match_case[0].logic_name<<' '
+            	<<(*it)->match_case[0].name<<' ';
+        for (unsigned i=0;i<(*it)->match_case[0].FaninNames.size();i++)
+        {  
+            string gatename = (*it)->match_case[0].FaninNames[i];
+            //gstack.push_back(this->getByName(gatename));   
+            outfile<<gatename<<' ';
+        }
+        outfile<<endl;
+    }       
+    
+    
+    
     outfile.close();
 }
+
+vector <gate*> tree::all_out_node()
+{
+	vector <gate*> ans;
+	for (vector<gate>::iterator iter=gates.begin() ; iter!=gates.end() ; ++iter)
+	{
+		if (iter->getFanout().size()!=1)
+			ans.push_back(&(*iter));
+	}
+	return ans;
+}
+
 
 
 

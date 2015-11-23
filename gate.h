@@ -34,6 +34,9 @@ class gate
         
         
     public:
+    	//for output control
+    	int num;
+
     	//for topological
     	
     	int waiting_count;
@@ -57,7 +60,8 @@ class gate
         void addFanout(gate* gptr); //
         friend ostream& operator<< (ostream &out, gate &g); //
         
-        bool identical_structure(gate * gptr);
+        bool identical(gate * gptr);
+        bool identical_structure(gate* root,gate * gptr);
         void swapfanin();
  
         //bool isLeaf();
@@ -66,6 +70,8 @@ class gate
         void clearTmpCellFanin();
         void addMatchCell(int delay,string cellName,string logicName,vector<string> Fanin);
         int getDelay();
+        bool operator <(const gate &b) const;
+        bool operator >(const gate &b) const;
 };
 
 

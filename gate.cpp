@@ -5,7 +5,7 @@ gate::gate()
     fanin.reserve(50);
     fanout.reserve(50);
     FaninNames.reserve(50);        
-    match_case.reserve(50);
+    match_case.reserve(1500);
     tempCellFanin.reserve(50);
 }
 
@@ -62,24 +62,43 @@ ostream& operator<< (ostream &out, gate &g)
 	return out;
 }
 
-
-bool gate::identical_structure(gate* gptr)
+bool gate::identical(gate* gptr)
 {
-	if (this->getLogic() == gptr->getLogic() )
+	return identical_structure(this,gptr);
+}
+
+bool gate::identical_structure(gate* root,gate* gptr)
+{
+	if(gptr->getLogic() == 0)
 	{
-		if(gptr->getLogic() == 0) // INPUT
-		{
-		    this->tempCellFanin.push_back(this->getName());
-			return true;
+		if (this!=root)
+			root->tempCellFanin.push_back(this->getName());
+		
+		return true;
+	}
+	else if (this->getLogic() == gptr->getLogic() && this == root)
+	{
+		if(gptr->getLogic() == 2) // INV
+			return this->getFanin()[0]->identical_structure(root,gptr->getFanin()[0]);
 			
-		}
-		else if(gptr->getLogic() == 2 && this->fanout.size()<=1 ) // INV
-			return this->getFanin()[0]->identical_structure(gptr->getFanin()[0]);
+		else if(gptr->getLogic() == 1) // NAND2
+			return    this->getFanin()[0]->identical_structure(root,gptr->getFanin()[0])
+				    &&this->getFanin()[1]->identical_structure(root,gptr->getFanin()[1]) ;
+				    
+	}
+	else if (this->getLogic() == gptr->getLogic() && this != root)
+	{
+		if(gptr->getLogic() == 2 && this->fanout.size()<=1) // INV
+			return this->getFanin()[0]->identical_structure(root,gptr->getFanin()[0]);
+			
 		else if(gptr->getLogic() == 1 && this->fanout.size()<=1 ) // NAND2
-			return    this->getFanin()[0]->identical_structure(gptr->getFanin()[0])
-				    &&this->getFanin()[1]->identical_structure(gptr->getFanin()[1]) ;
+			return    this->getFanin()[0]->identical_structure(root,gptr->getFanin()[0])
+				    &&this->getFanin()[1]->identical_structure(root,gptr->getFanin()[1]) ;
+				    
 		else 
+		{
 		    return false;
+		}
 	}
 	else
 	{
@@ -101,21 +120,6 @@ void gate::swapfanin()
 	}
 }
 
-
-
-/*
-bool gate::isLeaf()
-{
-	if(logic==1)
-	{	
-		return fanin[0]->getLogic()==0 && fanin[1]->getLogic()==0 ;
-	}
-	else if(logic==2)
-	{
-		return fanin[0]->getLogic()==0 ;
-	}
-	else	
-}*/
 
 vector<string> gate::getRevFaninName()
 {
@@ -139,25 +143,39 @@ void gate::addMatchCell(int delay,string cellName,string logicName,vector<string
 {
     CELL c = {delay,cellName,logicName,Fanin};
     bool insert= true;
+    vector<CELL> new_match_case;
     for (vector<CELL>::iterator it=this->match_case.begin();it!=this->match_case.end();++it)
     {
-        if(it->delay>c.delay) 
+        if(it->delay<c.delay) 
         {
-            match_case.erase(it);
+        	new_match_case.push_back(*it);
+        	insert =false;
+            //match_case.erase(it);
         }
-        else if(it->delay<c.delay) 
-        {
-            insert = false;
-        } 
     }
+    //cout<<"YOOOOOOO"<<endl;
     if (insert)
-        match_case.push_back(c);
+        new_match_case.push_back(c);
+    match_case = new_match_case;
 }
 
 int gate::getDelay()
 {
+	
     if (logic==0)
         return 0;
     else
+    {
+    	//cout<<match_case.size()<<endl;
         return match_case[0].delay;
+    }
+}
+
+bool gate::operator <(const gate &b) const
+{
+	return num<b.num;
+}
+bool gate::operator >(const gate &b) const
+{
+	return num>b.num;
 }

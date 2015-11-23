@@ -12,7 +12,7 @@ class tree
     private:
     	
         vector<gate> gates; //topological order
-		vector<gate*> gstack;
+		//vector<gate*> gstack;
     public:
 	    vector<gate*> topologicalOrderGates;
 	    vector<tree*> expandtrees; //expand trees
@@ -35,10 +35,12 @@ class tree
         //bool operator==(tree & a;);
         
         gate* getRoot();
-        void match(tree* cell);
+        void match_celllib(vector<tree*> cellib);
+        void match(gate* gptr,tree* cell);
         
         
         void output(char* outfileName);
+        vector<gate*> all_out_node();
 };
 
 

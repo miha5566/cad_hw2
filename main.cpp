@@ -7,6 +7,7 @@
 #include "tree.h"
 using namespace std;
 
+
 int string_to_int(string s)
 {
 	int ans;
@@ -47,6 +48,7 @@ tree* parsing_graph(string graph_name,ifstream & infile)
         gateName = gateName+int_to_string(i);
         vector<string> faninName;
         ckt_graph->addGate(gateName,0,faninName);
+        ckt_graph->getByName(gateName)->num = i;
     }
     int no_gate;
     string line,gateLogic;
@@ -72,7 +74,6 @@ tree* parsing_graph(string graph_name,ifstream & infile)
             vector<string> faninName;
             faninName.push_back(input);
             ckt_graph->addGate(gateName,2,faninName); // only for inv
-            
         }
         else// for 2 input cells (NAND2 and others)
         {
@@ -84,7 +85,7 @@ tree* parsing_graph(string graph_name,ifstream & infile)
             ckt_graph->addGate(gateName,1,faninName); // only for nand2
             
         }
-        
+        ckt_graph->getByName(gateName)->num = input_num+no_gate;
         
         //linePipe.str(std::string()); // clear stringstream
         //linePipe.clear();
@@ -209,13 +210,16 @@ int main(int argc ,char * argv[])
  	}
  	*/
  	
+ 	//cout<<*treeptr;
+ 	/*
  	for(vector<tree*>::iterator it = celllib->begin(); it != celllib->end() ;++it)
  	{
-        //cout<<(*it)->name<<endl;
-        treeptr->match(*it);
-    }
+ 		if ((*it)->name == "NOR2")
+	        cout<<*(*it)<<endl;
         
-    //cout<<*treeptr;
+    }*/
+        
+    treeptr->match_celllib(*celllib);
     treeptr->output(argv[3]);
  	
     delete treeptr;
