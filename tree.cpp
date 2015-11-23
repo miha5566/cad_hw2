@@ -298,12 +298,15 @@ void tree::output(char* outfileName)
 //    gate* gptr=this->getRoot();
 
 	vector <gate*> all_node = this->all_out_node();
+	int outdelay=0;
 	for(vector <gate*>::iterator it = all_node.begin();it!=all_node.end();++it)
 	{
 		gstack.push_back (*it);
+		if ((*it)->match_case[0].delay>outdelay)
+			outdelay = (*it)->match_case[0].delay;
 	}
-
-    outfile<<this->getRoot()->match_case[0].delay<<endl<<endl;
+	outfile<<outdelay<<endl<<endl;
+    //outfile<<this->getRoot()->match_case[0].delay<<endl<<endl;
 
     while (gstack.size()>0)
     {
